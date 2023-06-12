@@ -57,27 +57,24 @@ void send24h()
 {
   String timestamp;
   std::string databasePath = "/LogTest";
-  String countPath = "/Counter/count";
+  String countPath = "/Counter/count"; 
 
-  if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0))
+  while (!timeClient.update())
   {
-    sendDataPrevMillis = millis();
+    timeClient.forceUpdate();
+  }
 
-    while (!timeClient.update())
-    {
-      timeClient.forceUpdate();
-    }
-    // Get current timestamp
-    timestamp = timeClient.getFormattedDate();
-    timestamp.replace("T", " ");
-    timestamp.replace("Z", "");
-    char timeStr[9];
-    char dateStr[11];
-    sscanf(timestamp.c_str(), "%10s %8s", dateStr, timeStr);
-    Serial.print("time: ");
-    Serial.println(timestamp);
+  // Get current timestamp
+  timestamp = timeClient.getFormattedDate();
+  timestamp.replace("T", " ");
+  timestamp.replace("Z", "");
+  char timeStr[9];
+  char dateStr[11];
+  sscanf(timestamp.c_str(), "%10s %8s", dateStr, timeStr);
+  Serial.print("time: ");
+  Serial.println(timestamp);
 
-    Firebase.getInt(firebaseData, countPath);
+  Firebase.getInt(firebaseData, countPath);
     int lastCount = firebaseData.intData();
 
     int currentCount = lastCount + 1;
@@ -102,11 +99,13 @@ void send24h()
     json.set(datePath, String(dateStr));
     json.set(timePath, String(timeStr));
 
-    Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&firebaseData, parentPath.c_str(), &json) ? "ok" : firebaseData.errorReason().c_str());
+    Serial.printf("Uploading json... %s\n", Firebase.RTDB.setJSON(&firebaseData, parentPath.c_str(), &json) ? "Success" : firebaseData.errorReason().c_str());
 
     Firebase.setInt(firebaseData, countPath, currentCount);
-  }
+
+  
 }
+
 
 void realtimeSend()
 {
@@ -124,8 +123,7 @@ void setup_firebase()
 
   Firebase.setReadTimeout(firebaseData, 1000 * 60);
   Firebase.setwriteSizeLimit(firebaseData, "tiny");
-  Serial.println("------------------------------------");
-  Serial.println("Connected to firebase");
+  Serial.println("Firebase setup success");
 }
 
 void print_status()
@@ -172,12 +170,10 @@ void setup_oled()
     for (;;)
       ;
   }
-  else {
-    Serial.println("SSD1306 allocation success");
-    }
+  delay(2000);
   display.clearDisplay();
   display.setTextColor(WHITE);
-
+  Serial.println(F("SSD1306 allocation success"));
   Serial.println("Initializing the scale");
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
   scale.set_scale(371);
@@ -224,9 +220,12 @@ void setup()
   timeClient.setTimeOffset(25200);
 }
 
+bool hasUploaded = false;
+
 void loop()
 {
   ultrasonic_depan();
+
   if (distance_1 < distance)
   {
     Open_Bin();
@@ -235,10 +234,37 @@ void loop()
   {
     servo.write(0);
   }
+
   ultrasonic_atas();
-  
   print_status();
-  send24h();
   realtimeSend();
   displayWeight();
+
+  String timestamp;
+  while (!timeClient.update())
+  {
+    timeClient.forceUpdate();
+  }
+  timestamp = timeClient.getFormattedDate();
+  timestamp.replace("T", " ");
+  timestamp.replace("Z", "");
+  char timeStr[9];
+  char dateStr[11];
+  sscanf(timestamp.c_str(), "%10s %8s", dateStr, timeStr);
+  Serial.print("time: ");
+  Serial.println(timestamp);
+
+  int currentHour, currentMinute, currentSecond;
+  sscanf(timeStr, "%d:%d:%d", &currentHour, &currentMinute, &currentSecond);
+
+  if (currentHour == 14 && currentMinute == 29 && currentSecond >= 0 && currentSecond <= 59 && !hasUploaded)
+  {
+    send24h();
+    hasUploaded = true; // Set the flag to indicate that upload has been done
+  }
+  else if (currentHour == 14 && currentMinute == 30 && currentSecond == 0)
+  {
+    Serial.print("no upload");
+    hasUploaded = false; // Reset the flag to allow upload in the next interval
+  }
 }
