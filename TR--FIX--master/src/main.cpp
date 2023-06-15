@@ -176,7 +176,7 @@ void setup_oled()
   Serial.println(F("SSD1306 allocation success"));
   Serial.println("Initializing the scale");
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
-  scale.set_scale(371);
+  scale.set_scale(395);
   scale.tare();
 }
 
@@ -257,14 +257,14 @@ void loop()
   int currentHour, currentMinute, currentSecond;
   sscanf(timeStr, "%d:%d:%d", &currentHour, &currentMinute, &currentSecond);
 
-  if (currentHour == 14 && currentMinute == 29 && currentSecond >= 0 && currentSecond <= 59 && !hasUploaded)
+  if (currentHour == 20 && currentMinute == 59 && currentSecond >= 0 && currentSecond <= 59 && !hasUploaded)
   {
     send24h();
     hasUploaded = true; // Set the flag to indicate that upload has been done
   }
-  else if (currentHour == 14 && currentMinute == 30 && currentSecond == 0)
+  else
   {
-    Serial.print("no upload");
+    Serial.print("no upload\n\n");
     hasUploaded = false; // Reset the flag to allow upload in the next interval
   }
 }

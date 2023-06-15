@@ -41,8 +41,8 @@ Servo servo;
 // Firebase
 #define FIREBASE_HOST "https://esp-scale-default-rtdb.asia-southeast1.firebasedatabase.app/"
 #define FIREBASE_AUTH "18Xdv2jQpBwHZaAdqPUVNyzlp1OBlfgFIOsDRxoc"
-#define WIFI_SSID "hotspot"
-#define WIFI_PASSWORD "lulba0309"
+#define WIFI_SSID "mekel"
+#define WIFI_PASSWORD "kekel0309"
 
 FirebaseData firebaseData;
 FirebaseJson json;
@@ -63,9 +63,6 @@ String percentPath = "/fullness";
 
 // Parent node
 String parentPath;
-
-unsigned long sendDataPrevMillis = 0;
-unsigned long timerDelay = 60000;
 
 int distanceCm;
 int percentage;
