@@ -5,6 +5,8 @@
 #include <WiFi.h>
 #include <time.h>
 #include <NTPClient.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include "HX711.h"
 #include "SPI.h"
 #include "Adafruit_SSD1306.h"
@@ -33,16 +35,16 @@ Servo servo;
 #define SCREEN_HEIGHT 64
 
 // UltraSonic settings
-#define distance 10
-#define height 25
-#define SOUND_SPEED 0.034
+#define distance 15
+#define height 24
+#define SOUND_SPEED 0.0343
 #define CM_TO_INCH 0.393701
 
 // Firebase
 #define FIREBASE_HOST "https://esp-scale-default-rtdb.asia-southeast1.firebasedatabase.app/"
 #define FIREBASE_AUTH "18Xdv2jQpBwHZaAdqPUVNyzlp1OBlfgFIOsDRxoc"
-#define WIFI_SSID "mekel"
-#define WIFI_PASSWORD "kekel0309"
+#define WIFI_SSID "ROG"
+#define WIFI_PASSWORD "12345678"
 
 FirebaseData firebaseData;
 FirebaseJson json;
